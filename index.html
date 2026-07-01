@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>2048 · Show the Math</title>
+    <meta
+      name="description"
+      content="Play 2048 alongside a live expectimax solver that shows its expected-value calculations in real time."
+    />
+  </head>
+  <body>
+    <div id="app">
+      <header class="app-header">
+        <h1>2048 <span class="subtitle">· show the math</span></h1>
+        <p class="tagline">
+          Play alongside an expectimax solver that streams its expected-value
+          calculations live.
+        </p>
+      </header>
+
+      <main class="layout">
+        <section class="game-column" aria-label="Game">
+          <div class="scoreboard">
+            <div class="score-box">
+              <span class="score-label">Score</span>
+              <span class="score-value" id="score">0</span>
+            </div>
+            <div class="score-box">
+              <span class="score-label">Best</span>
+              <span class="score-value" id="best">0</span>
+            </div>
+            <button id="new-game" class="btn" type="button">New game</button>
+          </div>
+          <div id="board" class="board" aria-label="2048 board"></div>
+        </section>
+
+        <section class="math-column" aria-label="Solver math">
+          <div id="math-panel" class="math-panel">
+            <p class="placeholder">The solver's math panel will appear here.</p>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
