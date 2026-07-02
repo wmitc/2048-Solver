@@ -234,11 +234,155 @@ body {
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
   border-radius: 8px;
-  padding: 16px;
+  padding: 18px 20px;
   min-height: 200px;
 }
 
 .placeholder {
   color: #b3a99d;
   font-style: italic;
+}
+
+.math-heading h2 {
+  margin: 0 0 2px;
+  font-size: 1.1rem;
+}
+
+.math-heading p {
+  margin: 0 0 16px;
+  font-size: 0.82rem;
+  color: #9a8f82;
+}
+
+.move-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.move-row {
+  display: grid;
+  grid-template-columns: 64px 1fr 72px 64px;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-variant-numeric: tabular-nums;
+  transition: background 0.2s ease;
+}
+
+.move-row.best {
+  background: rgba(237, 194, 46, 0.16);
+}
+
+.move-row.illegal {
+  opacity: 0.4;
+}
+
+.move-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+}
+
+.move-arrow {
+  font-size: 1.2rem;
+  color: var(--accent);
+}
+
+.move-name {
+  font-size: 0.85rem;
+}
+
+.ev-bar {
+  position: relative;
+  height: 14px;
+  border-radius: 7px;
+  background: #efe9e1;
+  overflow: hidden;
+}
+
+.ev-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  border-radius: 7px;
+  background: linear-gradient(90deg, #bbada0, #8f7a66);
+  transition: width 0.25s ease;
+}
+
+.move-row.best .ev-fill {
+  background: linear-gradient(90deg, #edc850, #edc22e);
+}
+
+.ev-value {
+  text-align: right;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.ev-delta {
+  text-align: right;
+  font-size: 0.78rem;
+  color: #9a8f82;
+}
+
+.move-row.best .ev-delta {
+  color: #bf9c1c;
+  font-weight: 700;
+}
+
+.recommendation {
+  margin-top: 16px;
+  font-size: 0.95rem;
+}
+
+.recommendation strong {
+  color: var(--accent);
+  font-size: 1.05rem;
+}
+
+.recommendation.terminal {
+  color: #c0392b;
+  font-weight: 700;
+}
+
+.chance-summary,
+.search-stats {
+  margin-top: 8px;
+  font-size: 0.76rem;
+  color: #9a8f82;
+  font-variant-numeric: tabular-nums;
+}
+
+.search-stats {
+  font-family: "SFMono-Regular", "Consolas", monospace;
+  color: #b0a596;
+}
+
+/* Solver's recommended-move arrow, glowing on the relevant board edge. */
+.move-hint {
+  position: absolute;
+  z-index: 8;
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: rgba(143, 122, 102, 0.9);
+  text-shadow: 0 0 12px rgba(237, 194, 46, 0.9);
+  pointer-events: none;
+  animation: hint-pulse 1.2s ease-in-out infinite;
+}
+
+.move-hint.hidden {
+  display: none;
+}
+
+.move-hint[data-dir="up"] { top: 4px; left: 50%; transform: translateX(-50%); }
+.move-hint[data-dir="down"] { bottom: 4px; left: 50%; transform: translateX(-50%); }
+.move-hint[data-dir="left"] { left: 6px; top: 50%; transform: translateY(-50%); }
+.move-hint[data-dir="right"] { right: 6px; top: 50%; transform: translateY(-50%); }
+
+@keyframes hint-pulse {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 1; }
 }

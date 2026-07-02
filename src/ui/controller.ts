@@ -43,6 +43,11 @@ export class GameController {
     return this.state;
   }
 
+  /** Show or clear the solver's recommended-move arrow on the board. */
+  showHint(direction: Direction | null): void {
+    this.view.showHint(direction);
+  }
+
   getBest(): number {
     return this.best;
   }
