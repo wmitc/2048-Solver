@@ -11,8 +11,22 @@
  * their partner, and the spawned tile pops in afterwards.
  */
 
-import { type Board, SIZE, colOf, rowOf, tileValue } from "../engine/board.ts";
+import {
+  type Board,
+  type Direction,
+  SIZE,
+  colOf,
+  rowOf,
+  tileValue,
+} from "../engine/board.ts";
 import { type TileTrace } from "../engine/moves.ts";
+
+const HINT_ARROWS: Record<Direction, string> = {
+  up: "↑",
+  down: "↓",
+  left: "←",
+  right: "→",
+};
 
 const SLIDE_MS = 110;
 
@@ -24,6 +38,7 @@ interface LiveTile {
 
 export class BoardView {
   private readonly tileLayer: HTMLElement;
+  private readonly hintEl: HTMLElement;
   private tiles: LiveTile[] = [];
   private idSeq = 0;
 
@@ -43,6 +58,21 @@ export class BoardView {
     this.tileLayer = document.createElement("div");
     this.tileLayer.className = "tile-layer";
     this.root.appendChild(this.tileLayer);
+
+    this.hintEl = document.createElement("div");
+    this.hintEl.className = "move-hint hidden";
+    this.root.appendChild(this.hintEl);
+  }
+
+  /** Show a glowing arrow for the solver's recommended move (null hides it). */
+  showHint(direction: Direction | null): void {
+    if (!direction) {
+      this.hintEl.classList.add("hidden");
+      return;
+    }
+    this.hintEl.textContent = HINT_ARROWS[direction];
+    this.hintEl.dataset.dir = direction;
+    this.hintEl.classList.remove("hidden");
   }
 
   /** Clear all tiles and render `board` from scratch (used for new games). */
