@@ -113,6 +113,121 @@ body {
   aspect-ratio: 1 / 1;
   background: var(--board-bg);
   border-radius: 8px;
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+}
+
+/* Static background cells, laid out on a 4x4 grid. */
+.grid-bg {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+}
+
+.cell {
+  position: relative;
+}
+
+.cell::after {
+  content: "";
+  position: absolute;
+  inset: 8%;
+  border-radius: 6px;
+  background: var(--cell-bg);
+}
+
+/* Tiles float above the grid; each is a 25% square positioned by transform. */
+.tile-layer {
+  position: absolute;
+  inset: 0;
+}
+
+.tile {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 25%;
+  height: 25%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.11s ease-in-out;
+  will-change: transform;
+  color: var(--tile-color, #776e65);
+  font-weight: 800;
+  font-size: calc(min(460px, 46vw) / 4 * 0.42 * var(--tile-font-scale, 1));
+}
+
+/* Inner inset (via a pseudo-element background) creates the gap between tiles
+   while the tile box itself stays exactly one grid cell for clean transforms. */
+.tile::before {
+  content: "";
+  position: absolute;
+  inset: 8%;
+  border-radius: 6px;
+  background: var(--tile-bg, #eee4da);
+  z-index: -1;
+}
+
+.tile[data-value="2"] { --tile-bg: #eee4da; --tile-color: #776e65; }
+.tile[data-value="4"] { --tile-bg: #ede0c8; --tile-color: #776e65; }
+.tile[data-value="8"] { --tile-bg: #f2b179; --tile-color: #f9f6f2; }
+.tile[data-value="16"] { --tile-bg: #f59563; --tile-color: #f9f6f2; }
+.tile[data-value="32"] { --tile-bg: #f67c5f; --tile-color: #f9f6f2; }
+.tile[data-value="64"] { --tile-bg: #f65e3b; --tile-color: #f9f6f2; }
+.tile[data-value="128"] { --tile-bg: #edcf72; --tile-color: #f9f6f2; }
+.tile[data-value="256"] { --tile-bg: #edcc61; --tile-color: #f9f6f2; }
+.tile[data-value="512"] { --tile-bg: #edc850; --tile-color: #f9f6f2; }
+.tile[data-value="1024"] { --tile-bg: #edc53f; --tile-color: #f9f6f2; }
+.tile[data-value="2048"] { --tile-bg: #edc22e; --tile-color: #f9f6f2; }
+.tile[data-value="4096"],
+.tile[data-value="8192"],
+.tile[data-value="16384"] { --tile-bg: #3c3a32; --tile-color: #f9f6f2; }
+
+@keyframes pop-spawn {
+  0% { transform-origin: center; opacity: 0; }
+  60% { opacity: 1; }
+}
+
+@keyframes pop-merge {
+  0% { scale: 1; }
+  50% { scale: 1.18; }
+  100% { scale: 1; }
+}
+
+.tile.pop-spawn::before {
+  animation: pop-spawn 0.16s ease-out;
+}
+
+.tile.pop-merge::before {
+  animation: pop-merge 0.16s ease-out;
+}
+
+.board-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text);
+  background: rgba(238, 228, 218, 0.72);
+  z-index: 10;
+  transition: opacity 0.3s ease;
+}
+
+.board-overlay.won {
+  color: #f9f6f2;
+  background: rgba(237, 194, 46, 0.78);
+}
+
+.board-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .math-panel {
