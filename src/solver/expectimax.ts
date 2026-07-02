@@ -51,6 +51,8 @@ export interface SearchStats {
   cacheHits: number;
   /** Distinct empty cells considered at the root chance layer. */
   rootSpawnCells: number;
+  /** Wall-clock time this search took, in milliseconds. */
+  elapsedMs: number;
 }
 
 export interface MoveEvaluation {
@@ -93,11 +95,12 @@ export function search(
   depth: number,
   options: SearchOptions = {},
 ): SearchResult {
+  const startedAt = performance.now();
   const ctx: SearchContext = {
     weights: options.weights ?? DEFAULT_WEIGHTS,
     cutoff: options.probabilityCutoff ?? DEFAULT_PROBABILITY_CUTOFF,
     cache: new Map(),
-    stats: { depth, nodes: 0, cacheHits: 0, rootSpawnCells: 0 },
+    stats: { depth, nodes: 0, cacheHits: 0, rootSpawnCells: 0, elapsedMs: 0 },
   };
 
   const moves: MoveEvaluation[] = [];
@@ -119,6 +122,7 @@ export function search(
   }
 
   ctx.stats.rootSpawnCells = emptyCells(board).length;
+  ctx.stats.elapsedMs = performance.now() - startedAt;
   return { best, moves, stats: ctx.stats };
 }
 
