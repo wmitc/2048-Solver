@@ -2,6 +2,7 @@ import "./styles/main.css";
 import { GameController } from "./ui/controller.ts";
 import { attachInput } from "./ui/input.ts";
 import { MathPanel } from "./ui/mathPanel.ts";
+import { AutoPlayer } from "./ui/autoplay.ts";
 import { SolverClient } from "./solver/client.ts";
 
 function requireElement(id: string): HTMLElement {
@@ -18,28 +19,43 @@ function bootstrap(): void {
   const bestEl = requireElement("best");
   const newGameBtn = requireElement("new-game");
   const mathEl = requireElement("math-panel");
+  const autoplayBtn = requireElement("autoplay-toggle") as HTMLButtonElement;
+  const speedInput = requireElement("speed") as HTMLInputElement;
 
   const controller = new GameController(boardEl);
   const mathPanel = new MathPanel(mathEl);
   const solver = new SolverClient();
 
+  const autoPlayer = new AutoPlayer({
+    playMove: (direction) => controller.move(direction),
+    onRunningChange: (running) => {
+      autoplayBtn.textContent = running ? "⏸ Stop" : "▶ Auto-play";
+      autoplayBtn.classList.toggle("active", running);
+    },
+  });
+  autoPlayer.setDelayFromSlider(Number(speedInput.value));
+
   const overlay = document.createElement("div");
   overlay.className = "board-overlay hidden";
   boardEl.appendChild(overlay);
 
-  // Analyze the current position and stream EVs into the math panel. Each call
-  // supersedes the previous analysis inside the worker.
+  // Analyze the current position, streaming EVs into the math panel. On the
+  // final (deepest) result, hand the recommendation to the auto-player.
   function analyze(): void {
     const { board, over } = controller.getState();
     if (over) {
       mathPanel.clear();
       controller.showHint(null);
+      autoPlayer.handleAnalysis(null);
       return;
     }
     mathPanel.clear();
-    solver.analyze(board, ({ result }) => {
+    solver.analyze(board, ({ result, final }) => {
       mathPanel.render(result);
       controller.showHint(result.best);
+      if (final) {
+        autoPlayer.handleAnalysis(result.best);
+      }
     });
   }
 
@@ -61,7 +77,16 @@ function bootstrap(): void {
   });
 
   attachInput(boardEl, { onMove: (direction) => controller.move(direction) });
-  newGameBtn.addEventListener("click", () => controller.newGame());
+
+  newGameBtn.addEventListener("click", () => {
+    autoPlayer.stop();
+    controller.newGame();
+  });
+
+  autoplayBtn.addEventListener("click", () => autoPlayer.toggle());
+  speedInput.addEventListener("input", () =>
+    autoPlayer.setDelayFromSlider(Number(speedInput.value)),
+  );
 }
 
 bootstrap();
