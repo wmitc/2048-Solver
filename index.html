@@ -33,6 +33,22 @@
             <button id="new-game" class="btn" type="button">New game</button>
           </div>
           <div id="board" class="board" aria-label="2048 board"></div>
+          <div class="controls">
+            <button id="autoplay-toggle" class="btn secondary" type="button">
+              ▶ Auto-play
+            </button>
+            <label class="speed">
+              <span>Speed</span>
+              <input
+                id="speed"
+                type="range"
+                min="0"
+                max="100"
+                value="60"
+                aria-label="Auto-play speed"
+              />
+            </label>
+          </div>
         </section>
 
         <section class="math-column" aria-label="Solver math">

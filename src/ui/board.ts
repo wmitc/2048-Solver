@@ -41,6 +41,9 @@ export class BoardView {
   private readonly hintEl: HTMLElement;
   private tiles: LiveTile[] = [];
   private idSeq = 0;
+  /** Finalizer for the in-flight slide animation, if any. */
+  private pendingFinalize: (() => void) | null = null;
+  private pendingTimer: number | null = null;
 
   constructor(private readonly root: HTMLElement) {
     this.root.classList.add("board");
@@ -77,6 +80,7 @@ export class BoardView {
 
   /** Clear all tiles and render `board` from scratch (used for new games). */
   reset(board: Board): void {
+    this.cancelPending();
     this.tileLayer.innerHTML = "";
     this.tiles = [];
     for (let i = 0; i < board.length; i++) {
@@ -89,8 +93,14 @@ export class BoardView {
   /**
    * Animate a move: slide existing tiles per `traces`, then reconcile against
    * `nextBoard` and pop in the tile spawned at `spawnIndex` (-1 for none).
+   *
+   * If a previous slide is still animating (fast auto-play can outpace the
+   * animation), it is finalized synchronously first so the view never leaks
+   * tiles or drifts out of sync with the board.
    */
   animateMove(traces: TileTrace[], nextBoard: Board, spawnIndex: number): void {
+    this.finalizePending();
+
     // Match each trace to a live tile at its source cell and slide it.
     const remaining = [...this.tiles];
     const survivors: LiveTile[] = [];
@@ -115,7 +125,7 @@ export class BoardView {
 
     this.tiles = survivors;
 
-    window.setTimeout(() => {
+    const finalize = (): void => {
       // Fold merged tiles into their partner and bump the survivor's value.
       for (const gone of mergedAway) {
         gone.el.remove();
@@ -131,7 +141,30 @@ export class BoardView {
       if (spawnIndex >= 0) {
         this.tiles.push(this.createTile(spawnIndex, nextBoard[spawnIndex], "spawn"));
       }
-    }, SLIDE_MS);
+    };
+
+    this.pendingFinalize = finalize;
+    this.pendingTimer = setTimeout(() => this.finalizePending(), SLIDE_MS);
+  }
+
+  /** Run the pending slide finalizer now (if any), cancelling its timer. */
+  private finalizePending(): void {
+    if (this.pendingTimer !== null) {
+      clearTimeout(this.pendingTimer);
+      this.pendingTimer = null;
+    }
+    const finalize = this.pendingFinalize;
+    this.pendingFinalize = null;
+    finalize?.();
+  }
+
+  /** Drop the pending slide finalizer without running it (used on reset). */
+  private cancelPending(): void {
+    if (this.pendingTimer !== null) {
+      clearTimeout(this.pendingTimer);
+      this.pendingTimer = null;
+    }
+    this.pendingFinalize = null;
   }
 
   private createTile(index: number, exponent: number, pop: "spawn" | "merge"): LiveTile {

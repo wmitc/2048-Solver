@@ -107,6 +107,41 @@ body {
   background: var(--accent-hover);
 }
 
+.btn.secondary {
+  margin-left: 0;
+  background: #bbada0;
+}
+
+.btn.secondary:hover {
+  background: #a99a8b;
+}
+
+.btn.secondary.active {
+  background: #edc22e;
+  color: #6b5c14;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.speed {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #9a8f82;
+}
+
+.speed input[type="range"] {
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
 .board {
   position: relative;
   width: 100%;
