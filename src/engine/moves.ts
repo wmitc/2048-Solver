@@ -100,6 +100,67 @@ export function applyMove(board: Board, direction: Direction): MoveResult {
   return { board: moved ? next : board, moved, gained };
 }
 
+/** Movement of a single tile during a slide, used to drive UI animations. */
+export interface TileTrace {
+  /** Flat index the tile started at. */
+  from: number;
+  /** Flat index the tile ended at. */
+  to: number;
+  /** Exponent of this tile before the move. */
+  exponent: number;
+  /**
+   * True when this tile slides onto a partner and the two combine. The partner
+   * (the tile that arrived first) has `merged: false` and the same `to`.
+   */
+  merged: boolean;
+}
+
+export interface TracedMove extends MoveResult {
+  /** Per-tile movements for animating the slide. Empty on illegal moves. */
+  traces: TileTrace[];
+}
+
+/**
+ * Like {@link applyMove}, but also reports where every tile travelled so the
+ * renderer can animate the slide. Merges yield two traces sharing a `to`: the
+ * surviving base tile (`merged: false`) and the tile that folds into it
+ * (`merged: true`).
+ */
+export function traceMove(board: Board, direction: Direction): TracedMove {
+  const base = applyMove(board, direction);
+  if (!base.moved) {
+    return { ...base, traces: [] };
+  }
+
+  const traces: TileTrace[] = [];
+  for (let lineNo = 0; lineNo < SIZE; lineNo++) {
+    const indices = lineIndices(direction, lineNo);
+    const entries: { exponent: number; from: number }[] = [];
+    for (const idx of indices) {
+      if (board[idx] !== 0) {
+        entries.push({ exponent: board[idx], from: idx });
+      }
+    }
+
+    let slot = 0; // destination position within the line
+    for (let i = 0; i < entries.length; i++) {
+      const to = indices[slot];
+      const current = entries[i];
+      const next = entries[i + 1];
+      if (next && next.exponent === current.exponent) {
+        traces.push({ from: current.from, to, exponent: current.exponent, merged: false });
+        traces.push({ from: next.from, to, exponent: next.exponent, merged: true });
+        i++; // consume the partner
+      } else {
+        traces.push({ from: current.from, to, exponent: current.exponent, merged: false });
+      }
+      slot++;
+    }
+  }
+
+  return { ...base, traces };
+}
+
 /** Whether sliding in `direction` would change the board. */
 export function canMove(board: Board, direction: Direction): boolean {
   return applyMove(board, direction).moved;
